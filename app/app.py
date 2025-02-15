@@ -10,7 +10,7 @@ app, rt = fast_app(
     live=True
 )
 
-products = [
+clubs = [
     {"name": "Rebel", "cover": "$20", "img": "https://picsum.photos/400/100?random=1"},
     {"name": "EFS", "cover": "$25", "img": "https://picsum.photos/400/100?random=2"},
     {"name": "Lost & Found", "cover": "$15", "img": "https://picsum.photos/400/100?random=3"},
@@ -28,49 +28,50 @@ def ClubCard(p):
         Img(src=p["img"], alt=p["name"], style="width:100%"),
         H4(p["name"], cls="mt-2"), 
         P(p["cover"], cls=TextPresets.bold_sm), 
-        Button("Click me!", cls=(ButtonT.primary, "mt-2"),  
-               # HTMX can be used as normal on any component
-               hx_get=product_detail.to(product_name=p['name']),
-               hx_push_url='true',
-               hx_target='body'))
+        Button(
+            "Click me!", 
+            cls=(ButtonT.primary, "mt-2"),  
+            hx_get=club_detail.to(club_name=p['name']),
+            hx_push_url='true',
+            hx_target='body'
+            )
+        )
 
 @rt
 def index():
-    return Titled("Night Life Guide App!",
-        Grid(*[ClubCard(p) for p in products], cols_lg=3))
+    return Titled(
+        "Night Life Guide App!",
+        Grid(*[ClubCard(p) for p in clubs], cols_lg=3)
+    )
 
-example_product_description = """\n
-This is a sample detailed description of the {product_name}.  You can see when clicking on the card
+example_club_description = """\n
+This is a sample detailed description of the {club_name} night club.  You can see when clicking on the card
 from the gallery you can:
 
-+ Have a detailed description of the product on the page
-+ Have an order form to fill out and submit
++ Have a detailed description of the club on the page
++ Have an order form to fill out and submit a booking
 + Anything else you want!
 """
 
 @rt
-def product_detail(product_name:str):
-    return Titled("Product Detail",
-        # Grid lays out its children in a responsive grid
+def club_detail(club_name:str):
+    return Titled("Club Detail",
         Grid( 
             Div(
-                H1(product_name),
-                # render_md is a helper that renders markdown into HTML using frankenui styles.
-                render_md(example_product_description.format(product_name=product_name))),
+                H1(club_name),
+                render_md(example_club_description.format(club_name=club_name))
+            ),
             Div(
                 H3("Order Form"),
-                # Form automatically has a class of 'space-y-3' for a margin between each child.
                 Form( 
-                    # LabelInput is a convience wrapper for a label and input that links them.
                     LabelInput("Name", id='name'), 
                     LabelInput("Email", id='email'),
                     LabelInput("Quantity", id='quantity'),
-                    # ButtonT.primary because this is the primary action of the page!
-                    Button("Submit", cls=ButtonT.primary))
-                    
-        ),
-        # Grid has defaults and args for cols at different breakpoints, but you can pass in
-        # your own to customize responsiveness.
-        cols_lg=2)) 
+                    Button("Submit", cls=ButtonT.primary)
+                )    
+            ),
+        cols_lg=2
+        )
+    ) 
 
 serve()
