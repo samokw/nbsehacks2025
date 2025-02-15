@@ -10,19 +10,20 @@ app, rt = fast_app(
     live=True
 )
 
-clubs = [
-    {"name": "Rebel", "cover": "$20", "img": "https://picsum.photos/400/100?random=1"},
-    {"name": "EFS", "cover": "$25", "img": "https://picsum.photos/400/100?random=2"},
-    {"name": "Lost & Found", "cover": "$15", "img": "https://picsum.photos/400/100?random=3"},
-    {"name": "CODA", "cover": "$20", "img": "https://picsum.photos/400/100?random=4"},
-    {"name": "Vertigo", "cover": "$20", "img": "https://picsum.photos/400/100?random=5"},
-    {"name": "The Fifth Social Club", "cover": "$25", "img": "https://picsum.photos/400/100?random=6"},
-    {"name": "Toybox", "cover": "$15", "img": "https://picsum.photos/400/100?random=7"},
-    {"name": "Wildflower", "cover": "$20", "img": "https://picsum.photos/400/100?random=8"},
-    {"name": "Cube", "cover": "$15", "img": "https://picsum.photos/400/100?random=9"},
-    {"name": "Uniun", "cover": "$20", "img": "https://picsum.photos/400/100?random=10"},
-]
-
+clubs = {
+    "Toronto": [
+        {"name": "Rebel", "cover": "$20", "img": "https://picsum.photos/400/100?random=1"},
+        {"name": "EFS", "cover": "$25", "img": "https://picsum.photos/400/100?random=2"},
+        {"name": "Lost & Found", "cover": "$15", "img": "https://picsum.photos/400/100?random=3"},
+        {"name": "CODA", "cover": "$20", "img": "https://picsum.photos/400/100?random=4"},
+        {"name": "Vertigo", "cover": "$20", "img": "https://picsum.photos/400/100?random=5"},
+        {"name": "The Fifth Social Club", "cover": "$25", "img": "https://picsum.photos/400/100?random=6"},
+        {"name": "Toybox", "cover": "$15", "img": "https://picsum.photos/400/100?random=7"},
+        {"name": "Wildflower", "cover": "$20", "img": "https://picsum.photos/400/100?random=8"},
+        {"name": "Cube", "cover": "$15", "img": "https://picsum.photos/400/100?random=9"},
+        {"name": "Uniun", "cover": "$20", "img": "https://picsum.photos/400/100?random=10"},
+    ]
+}
 def ClubCard(p):
     return Card( 
         Img(src=p["img"], alt=p["name"], style="width:100%"),
@@ -37,11 +38,36 @@ def ClubCard(p):
             )
         )
 
+
 @rt
-def index():
+def ClubsContainer(clubs, city_name):
+    return Grid(*[ClubCard(p) for p in clubs[city_name]], cols_lg=3)
+    
+CITIES = ["New York", "London", "Tokyo", "Paris", "Toronto", "Sydney"]
+
+
+@rt("/")
+def index(city: str = "Toronto"): 
+    select = Form(
+        Select(
+            *[Option(city_name, selected=(city_name==city)) for city_name in CITIES],
+            name="city",
+            hx_get="/",  
+            hx_trigger="change", 
+            hx_target="#city-data" 
+        )
+    )
+    
+    # Create content that will be updated based on city selection
+    city_data = ClubsContainer(clubs, city)
+    
     return Titled(
-        "Night Life Guide App!",
-        Grid(*[ClubCard(p) for p in clubs], cols_lg=3)
+        "City Data",
+        Container(
+            H1("Select a City"),
+            select,
+            city_data
+        )
     )
 
 example_club_description = """\n
@@ -72,6 +98,7 @@ def club_detail(club_name:str):
             ),
         cols_lg=2
         )
-    ) 
+    )
+
 
 serve()
